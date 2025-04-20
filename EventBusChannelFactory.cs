@@ -2,8 +2,8 @@ using FluentValidation;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using Smarty.Shared.EventBus.Interfaces;
-using Smarty.Shared.Options;
-using Smarty.Shared.Validation;
+using Smarty.Shared.EventBus.Options;
+using Smarty.Shared.EventBus.Validation;
 
 namespace Smarty.Shared.EventBus;
 
@@ -21,8 +21,7 @@ public class EventBusChannelFactory : IEventBusChannelFactory
     {
         if (_connection is null)
         {
-            EventBusOptionsValidator validator = new EventBusOptionsValidator();
-            validator.ValidateAndThrow(_options);
+            _options.ThrowIfNotValid();
            
             var factory = new ConnectionFactory
             {
