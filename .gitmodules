@@ -1,0 +1,3 @@
+[submodule "Abstractions"]
+	path = Abstractions
+	url = git@github.com:HeathK1iff/Smarty.Shared.EventBus.Abstractions.git
