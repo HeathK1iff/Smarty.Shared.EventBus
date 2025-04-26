@@ -1,6 +1,3 @@
-
-using System.Text;
-using System.Text.Json;
 using RabbitMQ.Client;
 using Smarty.Shared.EventBus.Abstractions.Events;
 using Smarty.Shared.EventBus.Abstractions.Interfaces;
@@ -9,27 +6,37 @@ using Smarty.Shared.EventBus.Options;
 
 namespace Smarty.Shared.EventBus;
 
-public class EventPublisher : IEventPublisher
+public sealed partial class EventBusChannelFactory
 {
-    readonly IEventBusChannelFactory _eventBusConnection;
-    readonly EventBusOptions _eventBusOptions;
-    IChannel? _channel;
-
-    public EventPublisher(IEventBusChannelFactory eventBusConnection, EventBusOptions eventBusOptions)
+    public sealed class EventPublisher : IEventPublisher
     {
-        _eventBusConnection = eventBusConnection ?? throw new ArgumentNullException(nameof(eventBusConnection));
-        _eventBusOptions = eventBusOptions ?? throw new ArgumentNullException(nameof(eventBusOptions));
-    }
+        readonly EventBusOptions _eventBusOptions;
+        readonly IEventQueueResolver _eventQueueResolver;
+        IChannel _channel;
 
-    public async Task PublishAsync(EventBase @event, CancellationToken cancellationToken)
-    {
-        if (_channel == null)
+        public EventPublisher(IChannel channel, 
+            EventBusOptions eventBusOptions,
+            IEventQueueResolver eventTypeResolver)
         {
-            _channel = await _eventBusConnection.CreateAndDeclareExchangeAsync(cancellationToken);
+            _channel = channel ?? throw new ArgumentNullException(nameof(channel));
+            _eventBusOptions = eventBusOptions ?? throw new ArgumentNullException(nameof(eventBusOptions));
+            _eventQueueResolver = eventTypeResolver ?? throw new ArgumentNullException(nameof(eventTypeResolver));
         }
 
-        var content = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(@event));
+        public async Task PublishAsync(EventBase @event, CancellationToken cancellationToken)
+        {
+            if (!await _eventQueueResolver.TryGetTopic(@event.GetType(), out var queue))
+            {
+                throw new Exception();
+            }
 
-        await _channel.BasicPublishAsync(_eventBusOptions.ExchangeName, @event.GetType().Name, content);
+            ArgumentNullException.ThrowIfNull(queue);
+            
+            var content = await queue.Serializator.SerializeAsync(@event);
+            
+
+            await _channel.BasicPublishAsync(_eventBusOptions.ExchangeName, @queue.QueueName, content, cancellationToken);
+        }
     }
+
 }

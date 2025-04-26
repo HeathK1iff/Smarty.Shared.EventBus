@@ -1,8 +1,10 @@
-using RabbitMQ.Client;
+using Smarty.Shared.EventBus.Abstractions.Interfaces;
 
 namespace Smarty.Shared.EventBus.Interfaces;
 
 public interface IEventBusChannelFactory
 {
-    Task<IChannel> CreateAndDeclareExchangeAsync(CancellationToken cancellationToken);
+    Task<IEventSubscriber> CreateSubscriberAsync(CancellationToken cancellationToken);
+
+    Task<IEventPublisher> CreatePublisherAsync(CancellationToken cancellationToken);
 }
