@@ -24,7 +24,7 @@ public sealed partial class EventBusChannelFactory
 
         public async Task Subscribe(Type eventType, IEventHandler eventHandler)
         {
-            if (!await _eventQueueResolver.TryGetTopic(eventType, out var queue))
+            if (!_eventQueueResolver.TryGetQueue(eventType, out var queue))
             {
                 throw new Exception();
             }

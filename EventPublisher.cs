@@ -25,7 +25,7 @@ public sealed partial class EventBusChannelFactory
 
         public async Task PublishAsync(EventBase @event, CancellationToken cancellationToken)
         {
-            if (!await _eventQueueResolver.TryGetTopic(@event.GetType(), out var queue))
+            if (!_eventQueueResolver.TryGetQueue(@event.GetType(), out var queue))
             {
                 throw new Exception();
             }
