@@ -38,7 +38,12 @@ public sealed partial class EventBusChannelFactory
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.ReceivedAsync += async (model, ea) =>
             {
-                var @event = await queue.Serializator.DeserializeAsync(ea.Body.ToArray(), _cancellationToken);
+                var @event = await queue.Serializator.DeserializeAsync(ea.Body.ToArray(), eventType, _cancellationToken);
+
+                if (@event is null)
+                {
+                    return;
+                }
 
                 await eventHandler.ReceivedAsync(@event, _cancellationToken);
             };

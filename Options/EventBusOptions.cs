@@ -2,8 +2,6 @@ namespace Smarty.Shared.EventBus.Options;
 
 public sealed class EventBusOptions
 {
-    public const string SectionName = "EventBus";
-
     public string? UserName { get; init; }
     public string? Password { get; init; }
     public string? HostName { get; init; }

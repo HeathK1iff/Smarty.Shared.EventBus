@@ -32,8 +32,7 @@ public sealed partial class EventBusChannelFactory
 
             ArgumentNullException.ThrowIfNull(queue);
             
-            var content = await queue.Serializator.SerializeAsync(@event);
-            
+            var content = queue.Serializator.Serialize(@event);
 
             await _channel.BasicPublishAsync(_eventBusOptions.ExchangeName, @queue.QueueName, content, cancellationToken);
         }

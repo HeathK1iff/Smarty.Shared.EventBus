@@ -4,7 +4,7 @@ namespace Smarty.Shared.EventBus.Interfaces;
 
 public interface IEventSerializator
 {
-    Task<EventBase> DeserializeAsync(byte[] content, CancellationToken cancellationToken);
+    Task<EventBase?> DeserializeAsync(byte[] content, Type type, CancellationToken cancellationToken);
 
-    Task<byte[]> SerializeAsync(EventBase content);
+    byte[] Serialize(EventBase content);
 }

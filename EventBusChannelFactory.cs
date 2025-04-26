@@ -3,6 +3,7 @@ using Smarty.Shared.EventBus.Abstractions.Interfaces;
 using Smarty.Shared.EventBus.Interfaces;
 using Smarty.Shared.EventBus.Options;
 using Smarty.Shared.EventBus.Validation;
+using Microsoft.Extensions.Options;
 
 namespace Smarty.Shared.EventBus;
 
@@ -12,9 +13,9 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
     readonly EventBusOptions _options;
     readonly IEventQueueResolver _eventTypeResolver;
 
-    public EventBusChannelFactory(EventBusOptions options, IEventQueueResolver eventTypeResolver)
+    public EventBusChannelFactory(IOptions<EventBusOptions> options, IEventQueueResolver eventTypeResolver)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         _eventTypeResolver = eventTypeResolver ?? throw new ArgumentNullException(nameof(eventTypeResolver));
     }
 
