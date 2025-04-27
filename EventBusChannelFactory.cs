@@ -3,6 +3,7 @@ using Smarty.Shared.EventBus.Abstractions.Interfaces;
 using Smarty.Shared.EventBus.Interfaces;
 using Smarty.Shared.EventBus.Options;
 using Smarty.Shared.EventBus.Validation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Smarty.Shared.EventBus;
@@ -12,11 +13,14 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
     IConnection? _connection;
     readonly EventBusOptions _options;
     readonly IEventQueueResolver _eventTypeResolver;
+    readonly IServiceProvider _serviceProvider;
 
-    public EventBusChannelFactory(IOptions<EventBusOptions> options, IEventQueueResolver eventTypeResolver)
+    public EventBusChannelFactory(IOptions<EventBusOptions> options, IEventQueueResolver eventTypeResolver,
+        IServiceProvider serviceProvider)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         _eventTypeResolver = eventTypeResolver ?? throw new ArgumentNullException(nameof(eventTypeResolver));
+        _serviceProvider  = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
     public async Task<IEventSubscriber> CreateSubscriberAsync(CancellationToken cancellationToken)
@@ -26,7 +30,7 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
 
         await channel.ExchangeDeclareAsync(_options.ExchangeName, type: ExchangeType.Direct);
 
-        return new EventSubscriber(channel, _eventTypeResolver, cancellationToken);
+        return new EventSubscriber(channel, _eventTypeResolver, cancellationToken, _serviceProvider);
     }
 
     public async Task<IEventPublisher> CreatePublisherAsync(CancellationToken cancellationToken)
