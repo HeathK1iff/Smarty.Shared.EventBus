@@ -5,4 +5,5 @@ public abstract class EventBase
     public Guid Id { get; init; }
     public DateTime Created { get; init; }
     public string? Sender { get; init; }
+    public int Version { get; init; }
 }
