@@ -6,5 +6,5 @@ public interface IEventSerializator
 {
     Task<EventBase?> DeserializeAsync(byte[] content, Type type, CancellationToken cancellationToken);
 
-    byte[] Serialize(EventBase content);
+    byte[] Serialize<T>(T content) where T: EventBase;
 }

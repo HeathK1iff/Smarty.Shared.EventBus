@@ -40,10 +40,11 @@ public sealed partial class EventBusChannelFactory
 
             ArgumentNullException.ThrowIfNull(queue);
 
-            await _channel.QueueDeclareAsync(queue.QueueName, 
-                queue.Options?.Durable ?? false, 
+            await _channel.QueueDeclareAsync(queue: queue.QueueName, 
+                exclusive: queue.Options?.Exclusive ?? false,
+                durable: queue.Options?.Durable ?? false, 
                 cancellationToken: _cancellationToken);
-
+            
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.ReceivedAsync += async (model, ea) =>
             { 

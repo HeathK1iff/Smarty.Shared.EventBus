@@ -2,8 +2,8 @@ using Smarty.Shared.EventBus.Abstractions.Events;
 
 namespace Smarty.Shared.EventBus.Abstractions.Interfaces;
 
-public interface IEventPublisher
+public interface IEventPublisher : IDisposable
 {
-    Task PublishAsync(EventBase @event, CancellationToken cancellationToken);
-    void Publish(EventBase @event);
+    Task PublishAsync<T>(T @event, CancellationToken cancellationToken) where T: EventBase;
+    void Publish<T>(T @event) where T: EventBase;
 }

@@ -95,7 +95,7 @@ public class EventBusConnectionString
     { 
         get
         {
-            return _dict.TryGetValue("Port", out var val) ? (int.TryParse(val, out var val2) ? val2 : 0) : 15672;
+            return _dict.TryGetValue("Port", out var val) ? (int.TryParse(val, out var val2) ? val2 : 0) : 5672;
         } 
         set
         {
@@ -120,7 +120,7 @@ public class EventBusConnectionString
         var dict = new Dictionary<string, string>();
         foreach (var keyValuePair in  input.Split(";"))
         {
-            var matches = Regex.Match(input, @"^(\w+)=(\w+)$");
+            var matches = Regex.Match(keyValuePair, @"^(\w+)=(.+)$");
 
             if (matches.Success)
             {
