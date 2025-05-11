@@ -2,23 +2,20 @@ using RabbitMQ.Client;
 using Smarty.Shared.EventBus.Abstractions.Interfaces;
 using Smarty.Shared.EventBus.Interfaces;
 using Smarty.Shared.EventBus.Options;
-using Smarty.Shared.EventBus.Validation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Smarty.Shared.EventBus;
 
 public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
 {
     IConnection? _connection;
-    readonly EventBusOptions _options;
+    readonly EventBusConnectionString _options;
     readonly IEventQueueResolver _eventTypeResolver;
     readonly IServiceProvider _serviceProvider;
 
-    public EventBusChannelFactory(IOptions<EventBusOptions> options, IEventQueueResolver eventTypeResolver,
+    public EventBusChannelFactory(string connectionString, IEventQueueResolver eventTypeResolver,
         IServiceProvider serviceProvider)
     {
-        _options = options.Value ?? throw new ArgumentNullException(nameof(options));
+        _options = EventBusConnectionString.Parce(connectionString);
         _eventTypeResolver = eventTypeResolver ?? throw new ArgumentNullException(nameof(eventTypeResolver));
         _serviceProvider  = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
@@ -47,12 +44,11 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
     {
          if (_connection is null)
         {
-            _options.ThrowIfNotValid();
-
             var factory = new ConnectionFactory
             {
                 UserName = _options.UserName!,
                 Password = _options.Password!,
+                Port = _options.Port,
                 VirtualHost = "/",
                 HostName = _options.HostName!,
                 ClientProvidedName = _options.ClientProvidedName
@@ -61,5 +57,15 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
         }
 
         return _connection;
+    }
+
+    public IEventPublisher CreatePublisher()
+    {
+        return CreatePublisherAsync(CancellationToken.None).GetAwaiter().GetResult();
+    }
+
+    public IEventSubscriber CreateSubscriberAsync()
+    {
+        return CreateSubscriberAsync(CancellationToken.None).GetAwaiter().GetResult();
     }
 }

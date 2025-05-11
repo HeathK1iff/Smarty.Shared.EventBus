@@ -4,5 +4,6 @@ namespace Smarty.Shared.EventBus.Abstractions.Interfaces;
 
 public interface IEventPublisher
 {
-    public Task PublishAsync(EventBase @event, CancellationToken cancellationToken);
+    Task PublishAsync(EventBase @event, CancellationToken cancellationToken);
+    void Publish(EventBase @event);
 }

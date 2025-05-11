@@ -26,7 +26,12 @@ public sealed partial class EventBusChannelFactory
             _serviceProvider  = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public async Task Subscribe(Type eventType, Type eventHandlerType)
+        public void Subscribe(Type eventType, Type eventHandlerType)
+        {
+            SubscribeAsync(eventType, eventHandlerType).GetAwaiter();
+        }
+
+        public async Task SubscribeAsync(Type eventType, Type eventHandlerType)
         {
             if (!_eventQueueResolver.TryGetQueue(eventType, out var queue))
             {
@@ -52,7 +57,7 @@ public sealed partial class EventBusChannelFactory
                 using var scope = _serviceProvider.CreateScope();
                 var serviceHandler = scope.ServiceProvider.GetRequiredService(eventHandlerType) as IEventHandler;
 
-                await serviceHandler.ReceivedAsync(@event, _cancellationToken);
+                await serviceHandler!.ReceivedAsync(@event, _cancellationToken);
             };
         }
     }

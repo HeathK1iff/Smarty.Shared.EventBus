@@ -10,17 +10,22 @@ public sealed partial class EventBusChannelFactory
 {
     public sealed class EventPublisher : IEventPublisher
     {
-        readonly EventBusOptions _eventBusOptions;
+        readonly EventBusConnectionString _eventBusOptions;
         readonly IEventQueueResolver _eventQueueResolver;
-        IChannel _channel;
+        readonly IChannel _channel;
 
         public EventPublisher(IChannel channel, 
-            EventBusOptions eventBusOptions,
+            EventBusConnectionString eventBusOptions,
             IEventQueueResolver eventTypeResolver)
         {
             _channel = channel ?? throw new ArgumentNullException(nameof(channel));
             _eventBusOptions = eventBusOptions ?? throw new ArgumentNullException(nameof(eventBusOptions));
             _eventQueueResolver = eventTypeResolver ?? throw new ArgumentNullException(nameof(eventTypeResolver));
+        }
+
+        public void Publish(EventBase @event)
+        {
+            PublishAsync(@event, CancellationToken.None).GetAwaiter();
         }
 
         public async Task PublishAsync(EventBase @event, CancellationToken cancellationToken)

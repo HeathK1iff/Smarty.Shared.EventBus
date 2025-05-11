@@ -7,4 +7,8 @@ public interface IEventBusChannelFactory
     Task<IEventSubscriber> CreateSubscriberAsync(CancellationToken cancellationToken);
 
     Task<IEventPublisher> CreatePublisherAsync(CancellationToken cancellationToken);
+
+    IEventPublisher CreatePublisher();
+
+    IEventSubscriber CreateSubscriberAsync();
 }
