@@ -27,15 +27,14 @@ public sealed partial class EventBusChannelFactory : IEventBusChannelFactory
 
         await channel.ExchangeDeclareAsync(_options.ExchangeName, type: ExchangeType.Direct);
 
-        return new EventSubscriber(channel, _eventTypeResolver, cancellationToken, _serviceProvider);
+        return new EventSubscriber(channel, _eventTypeResolver, cancellationToken, _serviceProvider,
+            _options.ExchangeName);
     }
 
     public async Task<IEventPublisher> CreatePublisherAsync(CancellationToken cancellationToken)
     {
         var connection = await GetOrCreateChannelAsync(cancellationToken);
         var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-
-        await channel.ExchangeDeclareAsync(_options.ExchangeName, type: ExchangeType.Direct);
 
         return new EventPublisher(channel, _options, _eventTypeResolver);
     }

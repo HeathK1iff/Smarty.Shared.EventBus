@@ -14,16 +14,19 @@ public sealed partial class EventBusChannelFactory
         readonly IEventQueueResolver _eventQueueResolver;
         readonly IChannel _channel;
         readonly IServiceProvider _serviceProvider;
+        readonly string _exchangeName;
 
-        public EventSubscriber(IChannel channel, 
+        public EventSubscriber(IChannel channel,
             IEventQueueResolver eventQueueResolver,
             CancellationToken cancellationToken,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            string exchangeName)
         {
             _cancellationToken = cancellationToken;
             _eventQueueResolver = eventQueueResolver ?? throw new ArgumentNullException(nameof(eventQueueResolver));
             _channel = channel ?? throw new ArgumentNullException(nameof(channel));
-            _serviceProvider  = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _exchangeName = exchangeName ?? throw new ArgumentNullException(nameof(exchangeName));
         }
 
         public void Subscribe(Type eventType, Type eventHandlerType)
@@ -40,10 +43,16 @@ public sealed partial class EventBusChannelFactory
 
             ArgumentNullException.ThrowIfNull(queue);
 
-            await _channel.QueueDeclareAsync(queue: queue.QueueName, 
+            await _channel.QueueDeclareAsync(
+                queue: queue.QueueName, 
                 exclusive: queue.Options?.Exclusive ?? false,
                 durable: queue.Options?.Durable ?? false, 
                 cancellationToken: _cancellationToken);
+
+            await _channel.QueueBindAsync(
+                queue: queue.QueueName,
+                exchange: _exchangeName,
+                routingKey: queue.RoutingKey);
             
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.ReceivedAsync += async (model, ea) =>

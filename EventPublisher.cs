@@ -38,17 +38,9 @@ public sealed partial class EventBusChannelFactory
 
             ArgumentNullException.ThrowIfNull(queue);
             
-            
-            await _channel.QueueDeclareAsync(queue: queue.QueueName, 
-                exclusive: queue.Options?.Exclusive ?? false,
-                durable: queue.Options?.Durable ?? false, 
-                cancellationToken: cancellationToken);
-
-            await _channel.QueueBindAsync(queue.QueueName, _eventBusOptions.ExchangeName, queue.QueueName);
-
             var content = queue.Serializator.Serialize(@event);
 
-            await _channel.BasicPublishAsync(_eventBusOptions.ExchangeName, routingKey: @queue.QueueName, content, cancellationToken);
+            await _channel.BasicPublishAsync(_eventBusOptions.ExchangeName, routingKey: @queue.RoutingKey, content, cancellationToken);
         }
 
         private void Dispose(bool disposing)
